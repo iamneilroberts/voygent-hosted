@@ -77,7 +77,11 @@ try {
 // Serve LibreChat built UI if present
 try {
   const librechatDist = path.resolve(__dirname, '../librechat/client/dist');
+  // Serve the SPA under /librechat
   app.use('/librechat', express.static(librechatDist, { fallthrough: true }));
+  // Also expose top-level assets at root paths expected by index.html
+  app.use('/assets', express.static(path.join(librechatDist, 'assets'), { fallthrough: true }));
+  app.use('/', express.static(librechatDist, { index: false, fallthrough: true })); // sw.js, workbox-*.js, manifest, etc.
   app.get('/librechat/*', (req, res) => {
     res.sendFile(path.join(librechatDist, 'index.html'));
   });
