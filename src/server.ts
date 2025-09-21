@@ -81,11 +81,31 @@ try {
 try {
   const librechatDist = path.resolve(__dirname, '../librechat/client/dist');
   // Serve the SPA under /librechat
-  app.use('/librechat', express.static(librechatDist, { fallthrough: true }));
+  app.use('/librechat', express.static(librechatDist, {
+    fallthrough: true,
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.js') || filePath.endsWith('.css')) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+    },
+  }));
   // Also expose top-level assets at root paths expected by index.html
   app.use('/assets', express.static(path.join(librechatDist, 'assets'), { fallthrough: true }));
-  app.use('/', express.static(librechatDist, { index: false, fallthrough: true })); // sw.js, workbox-*.js, manifest, etc.
+  app.use('/', express.static(librechatDist, {
+    index: false,
+    fallthrough: true,
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('index.html')) {
+        res.setHeader('Cache-Control', 'no-store');
+      } else if (filePath.endsWith('.js') || filePath.endsWith('.css')) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      } else if (filePath.endsWith('sw.js') || filePath.includes('workbox-')) {
+        res.setHeader('Cache-Control', 'no-cache');
+      }
+    },
+  })); // sw.js, workbox-*.js, manifest, etc.
   app.get('/librechat/*', (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
     res.sendFile(path.join(librechatDist, 'index.html'));
   });
   console.log('✅ LibreChat static UI mounted at /librechat');
