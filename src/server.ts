@@ -26,6 +26,8 @@ if (librechatUpstream) {
     target: librechatUpstream,
     changeOrigin: true,
     ws: true,
+    cookieDomainRewrite: '', // make upstream cookies valid for our domain
+    cookiePathRewrite: { '/': '/' },
     logLevel: 'warn',
   });
   app.use(['/api', '/oauth'], apiProxy);
