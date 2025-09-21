@@ -1,5 +1,14 @@
 import express from "express";
 
+// Add error handling for module loading
+process.on('uncaughtException', (error) => {
+  console.error('Extract route uncaught exception:', error);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Extract route unhandled rejection:', reason);
+});
+
 const router = express.Router();
 
 // Remote MCP API helper function

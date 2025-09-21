@@ -17,7 +17,7 @@
     "sourceMap": false
   },
   "include": [
-    "src/index.ts",
+    "src/server.ts",
     "src/routes/**/*"
   ],
   "exclude": [
