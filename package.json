@@ -13,7 +13,7 @@
     "start-api-only": "node dist/server.js",
     "install-librechat": "npm run clone-librechat && npm run setup-librechat",
     "clone-librechat": "git clone https://github.com/danny-avila/LibreChat.git librechat",
-    "setup-librechat": "npm install -g rimraf && cd librechat && npm ci && npm install rollup @rollup/plugin-typescript rollup-plugin-typescript2 @rollup/plugin-node-resolve rollup-plugin-peer-deps-external @rollup/plugin-commonjs @rollup/plugin-replace @rollup/plugin-terser @rollup/plugin-json @types/js-yaml && cp ../librechat.yaml . && cd ..",
+    "setup-librechat": "npm install -g rimraf && cd librechat && npm ci && npm install rollup /plugin-alias @rollup/plugin-typescript rollup-plugin-typescript2 @rollup/plugin-node-resolve rollup-plugin-peer-deps-external @rollup/plugin-commonjs @rollup/plugin-replace @rollup/plugin-terser @rollup/plugin-json @types/js-yaml && cp ../librechat.yaml . && cd ..",
     "build-all": "npm run build && cd librechat && npm run frontend && cd ..",
     "start-librechat": "cd librechat && npm start"
   },
