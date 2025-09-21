@@ -14,7 +14,7 @@
     "install-librechat": "npm run clone-librechat && npm run setup-librechat",
     "clone-librechat": "git clone https://github.com/danny-avila/LibreChat.git librechat",
     "setup-librechat": "cd librechat && npm ci && cp ../librechat.yaml . && cd ..",
-    "build-all": "npm run build && cd librechat && npm run build && cd ..",
+    "build-all": "npm run build && cd librechat && npm run frontend && cd ..",
     "start-librechat": "cd librechat && npm start"
   },
   "dependencies": {
