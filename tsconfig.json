@@ -17,11 +17,15 @@
     "sourceMap": false
   },
   "include": [
-    "src/**/*"
+    "src/index.ts",
+    "src/routes/**/*"
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "src/index-with-librechat.ts",
+    "src/librechat-proxy.ts",
+    "librechat"
   ],
   "ts-node": {
     "esm": true

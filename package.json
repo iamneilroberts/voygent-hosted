@@ -9,7 +9,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "test": "echo \"Tests not implemented yet\" && exit 0",
-    "build-api-only": "tsc",
+    "build-api-only": "npm install && tsc",
     "start-api-only": "node dist/index.js",
     "install-librechat": "npm run clone-librechat && npm run setup-librechat",
     "clone-librechat": "git clone https://github.com/danny-avila/LibreChat.git librechat",
