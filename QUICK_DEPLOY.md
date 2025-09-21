@@ -1,6 +1,39 @@
-# 🚀 Quick API-Only Deployment (No Build Errors)
+# 🚀 Quick Deployment
 
-## ⚡ **Fast Deploy Option - API Only**
+## ⚡ Option A — Full LibreChat (recommended)
+
+Use this to get the full LibreChat UI with Voygen config (models + 4 MCP servers) on Render.
+
+Render.com Settings:
+
+```
+Build Command: npm run build
+Start Command: npm run start
+```
+
+Required Env:
+
+```
+NODE_ENV=production
+CONFIG_PATH=/opt/render/project/src/librechat.yaml
+ENDPOINTS=custom
+MONGODB_URI=<your mongodb uri>
+JWT_SECRET=<min 32 chars>
+CREDS_KEY=<32 chars>
+CREDS_IV=<16 chars>
+ANTHROPIC_API_KEY=<key>
+# optional
+OPENAI_API_KEY=<key>
+```
+
+What it does:
+- Clones upstream LibreChat into `./librechat`
+- Copies the included `librechat.yaml` (has all 4 Cloudflare MCP servers)
+- Builds the client and starts LibreChat with that config
+
+---
+
+## ⚡ Option B — API Only
 
 If you're getting TypeScript build errors with LibreChat, use this **API-only** deployment first:
 

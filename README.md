@@ -159,6 +159,8 @@ Push your code to GitHub repository: `https://github.com/iamneilroberts/voygent-
 
 ### 2. Render.com Configuration
 
+Option A — Full LibreChat (recommended)
+
 Create a new Web Service with these settings:
 
 **Build Command:**
@@ -171,12 +173,17 @@ npm run build
 npm start
 ```
 
-**Environment Variables:**
+**Environment Variables (LibreChat):**
 - `NODE_ENV=production`
-- `MCP_D1_DATABASE_URL=https://d1-database-improved.somotravel.workers.dev`
-- `MCP_AUTH_KEY=your-mcp-auth-key`
-- `GITHUB_MCP_URL=https://github-mcp-cta.somotravel.workers.dev`
-- `GITHUB_AUTH_KEY=your-github-auth-key`
+- `CONFIG_PATH=/opt/render/project/src/librechat.yaml`
+- `ENDPOINTS=custom`
+- `MONGODB_URI` (Atlas or external)
+- `JWT_SECRET`, `CREDS_KEY`, `CREDS_IV`
+- `ANTHROPIC_API_KEY` (and optional `OPENAI_API_KEY`)
+
+This will clone upstream LibreChat, copy the provided `librechat.yaml` (which already lists the four Cloudflare MCP servers), build the client, and start LibreChat using that configuration.
+
+Option B — API-only is still available; see `QUICK_DEPLOY.md`.
 
 ### 3. Auto-Deploy
 

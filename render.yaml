@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: voygent-hosted
+    env: node
+    repo: https://github.com/iamneilroberts/voygent-hosted
+    branch: main
+    buildCommand: npm run build
+    startCommand: npm run start
+    plan: starter
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CONFIG_PATH
+        value: /opt/render/project/src/librechat.yaml
+      - key: ENDPOINTS
+        value: custom
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CREDS_KEY
+        sync: false
+      - key: CREDS_IV
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
