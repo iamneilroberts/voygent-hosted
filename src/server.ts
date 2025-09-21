@@ -6,6 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { spawn } from "child_process";
+import fs from "fs";
 
 const app = express();
 const port = parseInt(process.env.PORT || '3000', 10);
@@ -140,7 +141,9 @@ try {
 // Serve LibreChat built UI if present
 try {
   const librechatDist = path.resolve(__dirname, '../librechat/client/dist');
+  const hasIndex = fs.existsSync(path.join(librechatDist, 'index.html'));
   // Serve frontend at ROOT so router paths match
+  if (hasIndex) {
   app.use('/assets', express.static(path.join(librechatDist, 'assets'), { fallthrough: true }));
   app.use('/', express.static(librechatDist, {
     index: 'index.html',
@@ -181,6 +184,11 @@ app.use((err, req, res, next) => {
     error: 'Internal server error',
     message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
   });
+});
+
+// Minimal status shim so /voygen/extract/status always returns 200
+app.get('/voygen/extract/status', (_req, res) => {
+  res.json({ ok: true, service: 'extract', endpoints: ['POST /voygen/extract/hotels','POST /voygen/extract/rooms','GET /voygen/extract/status'] });
 });
 
 // 404 handler (API-only)
