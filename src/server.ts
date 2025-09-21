@@ -2,9 +2,15 @@
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 const port = parseInt(process.env.PORT || '3000', 10);
+
+// Resolve current dir for static paths
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Basic middleware
 app.use(cors());
@@ -32,7 +38,8 @@ app.get('/', (req, res) => {
       '/health',
       '/voygen/extract',
       '/voygen/import-from-url',
-      '/voygen/publish'
+      '/voygen/publish',
+      '/librechat (UI)'
     ]
   });
 });
@@ -65,6 +72,18 @@ try {
 
 } catch (error) {
   console.error('❌ Error loading routes:', error);
+}
+
+// Serve LibreChat built UI if present
+try {
+  const librechatDist = path.resolve(__dirname, '../librechat/client/dist');
+  app.use('/librechat', express.static(librechatDist, { fallthrough: true }));
+  app.get('/librechat/*', (req, res) => {
+    res.sendFile(path.join(librechatDist, 'index.html'));
+  });
+  console.log('✅ LibreChat static UI mounted at /librechat');
+} catch (err) {
+  console.warn('⚠️ LibreChat UI not found; skipping static mount');
 }
 
 // Error handling middleware
