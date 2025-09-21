@@ -11,8 +11,8 @@
     "test": "echo \"Tests not implemented yet\" && exit 0",
     "install-librechat": "npm run clone-librechat && npm run setup-librechat",
     "clone-librechat": "git clone https://github.com/danny-avila/LibreChat.git librechat",
-    "setup-librechat": "cd librechat && npm ci && cd ..",
-    "build-all": "npm run build && cd librechat && npm run build",
+    "setup-librechat": "npm install -g rimraf && cd librechat && npm ci && npm install rollup @rollup/plugin-typescript rollup-plugin-typescript2 @rollup/plugin-node-resolve rollup-plugin-peer-deps-external @rollup/plugin-commonjs @rollup/plugin-replace @rollup/plugin-terser @rollup/plugin-json @types/js-yaml && cd ..",
+    "build-all": "npm run build && cd librechat && npm run frontend",
     "start-librechat": "cd librechat && npm start",
     "dev-all": "concurrently \"npm run dev\" \"npm run start-librechat\""
   },

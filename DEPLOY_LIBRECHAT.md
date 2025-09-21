@@ -161,6 +161,25 @@ npm run build-all         # Build both API and LibreChat
 npm run start-librechat   # Start LibreChat with our config
 ```
 
+Note: The `setup-librechat` step installs required Rollup plugins inside the cloned LibreChat workspace to satisfy its monorepo build:
+
+```bash
+npm install -g rimraf
+cd librechat
+npm ci
+npm install \
+  rollup \
+  @rollup/plugin-typescript \
+  rollup-plugin-typescript2 \
+  @rollup/plugin-node-resolve \
+  rollup-plugin-peer-deps-external \
+  @rollup/plugin-commonjs \
+  @rollup/plugin-replace \
+  @rollup/plugin-terser \
+  @rollup/plugin-json \
+  @types/js-yaml
+```
+
 ## 📊 Resource Requirements
 
 ### Free Tier (512MB RAM)
@@ -205,6 +224,13 @@ curl https://your-app.onrender.com/voygen/extract/status
 **Missing environment variables:**
 ```bash
 # Check all required variables are set in Render dashboard
+```
+
+**Rollup plugin missing during LibreChat build (e.g. '@rollup/plugin-json' or '@rollup/plugin-typescript'):**
+```bash
+# Solution: Ensure your Build Command uses the latest scripts
+# from package.json which install required plugins during setup.
+# Then redeploy.
 ```
 
 ### Runtime Issues
