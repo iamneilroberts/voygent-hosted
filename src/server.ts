@@ -28,23 +28,10 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Root endpoint: in production, send users to the LibreChat UI
-app.get('/', (req, res) => {
-  if ((process.env.NODE_ENV || 'development') === 'production') {
-    return res.redirect(302, '/librechat/');
-  }
-  res.json({
-    message: 'Voygen API Server',
-    version: '0.1.0',
-    status: 'running',
-    endpoints: [
-      '/health',
-      '/voygen/extract',
-      '/voygen/import-from-url',
-      '/voygen/publish',
-      '/librechat (UI)'
-    ]
-  });
+// Root endpoint (dev info only if UI isn't mounted below)
+app.get('/', (req, res, next) => {
+  // If UI static later serves index.html, skip this handler
+  (res as any).sent ? next() : next();
 });
 
 // Import routes with error handling
@@ -80,19 +67,10 @@ try {
 // Serve LibreChat built UI if present
 try {
   const librechatDist = path.resolve(__dirname, '../librechat/client/dist');
-  // Serve the SPA under /librechat
-  app.use('/librechat', express.static(librechatDist, {
-    fallthrough: true,
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith('.js') || filePath.endsWith('.css')) {
-        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-      }
-    },
-  }));
-  // Also expose top-level assets at root paths expected by index.html
+  // Serve frontend at ROOT so router paths match
   app.use('/assets', express.static(path.join(librechatDist, 'assets'), { fallthrough: true }));
   app.use('/', express.static(librechatDist, {
-    index: false,
+    index: 'index.html',
     fallthrough: true,
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('index.html')) {
@@ -104,11 +82,21 @@ try {
       }
     },
   })); // sw.js, workbox-*.js, manifest, etc.
-  app.get('/librechat/*', (req, res) => {
-    res.setHeader('Cache-Control', 'no-store');
-    res.sendFile(path.join(librechatDist, 'index.html'));
+  // Rewrite legacy /librechat paths to root (router doesn't expect base path)
+  app.get(['/librechat', '/librechat/*'], (_req, res) => res.redirect(302, '/'));
+  // SPA fallback for client routes (avoid API paths)
+  app.get('*', (req, res, next) => {
+    if (req.method !== 'GET') return next();
+    if (req.path.startsWith('/voygen') || req.path.startsWith('/health')) return next();
+    // Only serve HTML to browser navigations
+    const accept = req.headers['accept'] || '';
+    if (typeof accept === 'string' && accept.includes('text/html')) {
+      res.setHeader('Cache-Control', 'no-store');
+      return res.sendFile(path.join(librechatDist, 'index.html'));
+    }
+    return next();
   });
-  console.log('✅ LibreChat static UI mounted at /librechat');
+  console.log('✅ LibreChat static UI mounted at root');
 } catch (err) {
   console.warn('⚠️ LibreChat UI not found; skipping static mount');
 }
@@ -122,13 +110,9 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
+// 404 handler (API-only)
 app.use((req, res) => {
-  res.status(404).json({
-    error: 'Endpoint not found',
-    path: req.path,
-    method: req.method
-  });
+  res.status(404).json({ error: 'Endpoint not found', path: req.path, method: req.method });
 });
 
 // Graceful error handling
