@@ -8,7 +8,12 @@
     "dev": "ts-node-esm src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "echo \"Tests not implemented yet\" && exit 0"
+    "test": "echo \"Tests not implemented yet\" && exit 0",
+    "install-librechat": "npm run clone-librechat && npm run setup-librechat",
+    "clone-librechat": "git clone https://github.com/danny-avila/LibreChat.git librechat",
+    "setup-librechat": "cd librechat && npm ci && cp ../librechat.yaml . && cd ..",
+    "build-all": "npm run build && cd librechat && npm run build && cd ..",
+    "start-librechat": "cd librechat && npm start"
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -17,7 +22,8 @@
     "jsdom": "^23.0.0",
     "@mozilla/readability": "^0.5.0",
     "node-fetch": "^3.3.2",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "http-proxy-middleware": "^2.0.6"
   },
   "devDependencies": {
     "typescript": "^5.3.3",
