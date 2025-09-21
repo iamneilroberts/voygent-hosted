@@ -173,6 +173,7 @@ try {
     return next();
   });
   console.log('✅ LibreChat static UI mounted at root');
+  }
 } catch (err) {
   console.warn('⚠️ LibreChat UI not found; skipping static mount');
 }
