@@ -5,6 +5,7 @@ import bodyParser from "body-parser";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createProxyMiddleware } from "http-proxy-middleware";
+import { spawn } from "child_process";
 
 const app = express();
 const port = parseInt(process.env.PORT || '3000', 10);
@@ -32,6 +33,56 @@ if (librechatUpstream) {
   });
   app.use(['/api', '/oauth'], apiProxy);
 }
+
+// If no upstream is provided, bootstrap LibreChat backend locally and proxy to it
+async function ensureLocalLibreChat() {
+  if (process.env.LIBRECHAT_URL) return; // upstream set; nothing to do
+
+  const external = process.env.RENDER_EXTERNAL_URL || '';
+  const publicURL = external.startsWith('http') ? external : undefined;
+
+  // Required: Mongo connection
+  if (!process.env.MONGO_URI) {
+    console.warn('⚠️ MONGO_URI is not set. LibreChat backend cannot start without MongoDB.');
+    console.warn('   Set MONGO_URI in Render → Environment. Example: mongodb+srv://<user>:<pass>@cluster/<db>?retryWrites=true&w=majority');
+    return;
+  }
+
+  // Spawn LibreChat API (port 3080)
+  const env = {
+    ...process.env,
+    HOST: '0.0.0.0',
+    PORT: process.env.LIBRECHAT_PORT || '3080',
+    TRUST_PROXY: process.env.TRUST_PROXY || '1',
+    DOMAIN_SERVER: publicURL || process.env.DOMAIN_SERVER || 'http://localhost:3080',
+    DOMAIN_CLIENT: publicURL || process.env.DOMAIN_CLIENT || 'http://localhost:3080',
+    NO_INDEX: process.env.NO_INDEX || 'true',
+    CONSOLE_JSON: process.env.CONSOLE_JSON || 'false',
+  } as NodeJS.ProcessEnv;
+
+  console.log('🚀 Starting embedded LibreChat backend on :3080');
+  const child = spawn('node', ['librechat/api/server/index.js'], {
+    env,
+    stdio: ['ignore', 'inherit', 'inherit'],
+  });
+
+  child.on('exit', (code) => {
+    console.error(`LibreChat backend exited with code ${code}`);
+  });
+
+  // Always proxy /api and /oauth to the local backend when upstream not set
+  const localProxy = createProxyMiddleware({
+    target: 'http://localhost:3080',
+    changeOrigin: true,
+    ws: true,
+    cookieDomainRewrite: '',
+    cookiePathRewrite: { '/': '/' },
+    logLevel: 'warn',
+  });
+  app.use(['/api', '/oauth'], localProxy);
+}
+
+ensureLocalLibreChat().catch((e) => console.error('Failed to start embedded LibreChat backend:', e));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
