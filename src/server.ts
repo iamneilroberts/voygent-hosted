@@ -41,9 +41,13 @@ async function ensureLocalLibreChat() {
   const external = process.env.RENDER_EXTERNAL_URL || '';
   const publicURL = external.startsWith('http') ? external : undefined;
 
-  // Required: Mongo connection
+  // Required: Mongo connection (accept either MONGO_URI or MONGODB_CONNECTION_STRING)
+  const mongoFromAlt = process.env.MONGODB_CONNECTION_STRING;
+  if (!process.env.MONGO_URI && mongoFromAlt) {
+    process.env.MONGO_URI = mongoFromAlt;
+  }
   if (!process.env.MONGO_URI) {
-    console.warn('⚠️ MONGO_URI is not set. LibreChat backend cannot start without MongoDB.');
+    console.warn('⚠️ Mongo connection not set. Provide MONGO_URI or MONGODB_CONNECTION_STRING.');
     console.warn('   Set MONGO_URI in Render → Environment. Example: mongodb+srv://<user>:<pass>@cluster/<db>?retryWrites=true&w=majority');
     return;
   }
@@ -58,6 +62,8 @@ async function ensureLocalLibreChat() {
     DOMAIN_CLIENT: publicURL || process.env.DOMAIN_CLIENT || 'http://localhost:3080',
     NO_INDEX: process.env.NO_INDEX || 'true',
     CONSOLE_JSON: process.env.CONSOLE_JSON || 'false',
+    // Ensure LibreChat sees the Mongo connection
+    MONGO_URI: process.env.MONGO_URI,
   } as NodeJS.ProcessEnv;
 
   console.log('🚀 Starting embedded LibreChat backend on :3080');
