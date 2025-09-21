@@ -1,0 +1,180 @@
+# Voygen LibreChat Configuration for Render.com
+# Minimum MCP servers for production deployment
+
+version: 1.1.0
+cache: true
+
+# REQUIRED: Global MCP server definitions for initialization
+mcpServers:
+  d1_database:
+    type: "streamable-http"
+    url: "https://d1-database-improved.somotravel.workers.dev/sse"
+    description: "Advanced trip and hotel data management"
+    startup: true
+
+  template_document:
+    type: "streamable-http"
+    url: "https://template-document-mcp.somotravel.workers.dev/sse"
+    description: "Travel document template rendering and publishing system"
+    startup: true
+
+  github_mcp_cta:
+    type: "streamable-http"
+    url: "https://github-mcp-cta.somotravel.workers.dev/sse"
+    description: "GitHub Pages publishing for travel documents"
+    startup: true
+
+  prompt_instructions:
+    type: "streamable-http"
+    url: "https://prompt-instructions-d1-mcp.somotravel.workers.dev/sse"
+    description: "Workflow and conversation management"
+    startup: true
+
+endpoints:
+  custom:
+    - name: "Voygen Anthropic"
+      apiKey: "${ANTHROPIC_API_KEY}"
+      baseURL: "https://api.anthropic.com/v1"
+      models:
+        default: ["claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022"]
+        fetch: false
+      titleConvo: true
+      titleMethod: "completion"
+      titleModel: "claude-3-5-haiku-20241022"
+
+      # MCP Servers integrated with this endpoint
+      mcpServers:
+        d1_database:
+          transport:
+            type: "sse"
+            url: "https://d1-database-improved.somotravel.workers.dev/sse"
+          description: "Advanced trip and hotel data management"
+          serverInstructions: |
+            This MCP server provides comprehensive trip planning capabilities via Cloudflare Workers.
+            Running in REMOTE MODE - data stored in Cloudflare D1 with advanced features.
+
+            Core tools:
+            - get_anything: Comprehensive search across all trip data
+            - create_trip_with_client: Create trips with client assignment
+            - bulk_trip_operations: Multi-operation transactions
+            - generate_proposal: Create travel proposals
+            - advance_workflow_phase: Manage trip workflow states
+
+            Prefer get_anything for broad searches and specific tools for targeted operations.
+
+        template_document:
+          transport:
+            type: "sse"
+            url: "https://template-document-mcp.somotravel.workers.dev/sse"
+          description: "Travel document template rendering and publishing system"
+          serverInstructions: |
+            This MCP server handles document rendering and publishing workflows.
+
+            Available tools:
+            - render_template: Generate HTML documents from trip data
+            - list_templates: Review available proposal/itinerary formats
+            - publish_travel_document: Push finalized documents to GitHub Pages
+
+            Use for creating professional travel proposals and itineraries.
+
+        github_mcp_cta:
+          transport:
+            type: "sse"
+            url: "https://github-mcp-cta.somotravel.workers.dev/sse"
+          description: "GitHub Pages publishing for travel documents"
+          serverInstructions: |
+            This MCP server publishes travel documents to GitHub Pages.
+
+            Key capabilities:
+            - publish_travel_document_with_dashboard_update: Publish documents with dashboard integration
+            - github_get_file: Read existing files from repository
+            - github_update_file: Update published documents
+            - sync_trip_status: Keep dashboard in sync with trip status
+
+            Use for publishing finalized proposals and maintaining the travel dashboard.
+
+        prompt_instructions:
+          transport:
+            type: "sse"
+            url: "https://prompt-instructions-d1-mcp.somotravel.workers.dev/sse"
+          description: "Workflow and conversation management"
+          serverInstructions: |
+            This MCP server manages travel agent workflows and conversation state.
+
+            Essential tools:
+            - travel_agent_start: Initialize travel planning workflows
+            - continue_trip: Resume work on existing trips with full context
+            - get_instruction: Retrieve workflow-specific guidance
+            - get_instructions_by_confidence: Get context-appropriate instructions
+
+            Use travel_agent_start at the beginning of sessions and continue_trip to resume work.
+
+    - name: "Voygen OpenAI"
+      apiKey: "${OPENAI_API_KEY}"
+      baseURL: "https://api.openai.com/v1"
+      models:
+        default: ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo"]
+        fetch: false
+      titleConvo: true
+      titleMethod: "completion"
+      titleModel: "gpt-4o-mini"
+
+      # Same MCP servers available for OpenAI endpoint
+      mcpServers:
+        d1_database:
+          transport:
+            type: "sse"
+            url: "https://d1-database-improved.somotravel.workers.dev/sse"
+          description: "Advanced trip and hotel data management"
+
+        template_document:
+          transport:
+            type: "sse"
+            url: "https://template-document-mcp.somotravel.workers.dev/sse"
+          description: "Travel document template rendering and publishing"
+
+        github_mcp_cta:
+          transport:
+            type: "sse"
+            url: "https://github-mcp-cta.somotravel.workers.dev/sse"
+          description: "GitHub Pages publishing"
+
+        prompt_instructions:
+          transport:
+            type: "sse"
+            url: "https://prompt-instructions-d1-mcp.somotravel.workers.dev/sse"
+          description: "Workflow and conversation management"
+
+# Interface configuration
+interface:
+  privacyPolicy:
+    externalUrl: "https://voygen.app/privacy"
+  termsOfService:
+    externalUrl: "https://voygen.app/terms"
+
+# File handling
+fileConfig:
+  endpoints:
+    custom:
+      fileLimit: 20
+      fileSizeLimit: 10  # MB
+      totalSizeLimit: 50  # MB
+      supportedMimeTypes:
+        - "image/jpeg"
+        - "image/png"
+        - "image/webp"
+        - "image/gif"
+        - "text/plain"
+        - "application/pdf"
+
+# Registration and authentication
+registration:
+  socialLogins: ["discord", "facebook", "github", "google"]
+
+# Rate limiting
+rateLimits:
+  fileUploads:
+    ipMax: 100
+    ipWindowInMinutes: 60
+    userMax: 50
+    userWindowInMinutes: 60
