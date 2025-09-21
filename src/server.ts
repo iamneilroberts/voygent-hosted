@@ -28,8 +28,11 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Root endpoint
+// Root endpoint: in production, send users to the LibreChat UI
 app.get('/', (req, res) => {
+  if ((process.env.NODE_ENV || 'development') === 'production') {
+    return res.redirect(302, '/librechat/');
+  }
   res.json({
     message: 'Voygen API Server',
     version: '0.1.0',
