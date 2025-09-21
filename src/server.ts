@@ -4,6 +4,7 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import path from "path";
 import { fileURLToPath } from "url";
+import { createProxyMiddleware } from "http-proxy-middleware";
 
 const app = express();
 const port = parseInt(process.env.PORT || '3000', 10);
@@ -16,6 +17,19 @@ const __dirname = path.dirname(__filename);
 app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+
+// Proxy LibreChat API and OAuth to upstream backend if provided
+const librechatUpstream = process.env.LIBRECHAT_URL;
+if (librechatUpstream) {
+  console.log(`🔁 Proxying /api and /oauth to ${librechatUpstream}`);
+  const apiProxy = createProxyMiddleware({
+    target: librechatUpstream,
+    changeOrigin: true,
+    ws: true,
+    logLevel: 'warn',
+  });
+  app.use(['/api', '/oauth'], apiProxy);
+}
 
 // Health check endpoint
 app.get('/health', (req, res) => {
