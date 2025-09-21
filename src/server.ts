@@ -192,6 +192,26 @@ app.get('/voygen/extract/status', (_req, res) => {
   res.json({ ok: true, service: 'extract', endpoints: ['POST /voygen/extract/hotels','POST /voygen/extract/rooms','GET /voygen/extract/status'] });
 });
 
+// Proxy LibreChat UI to upstream if configured
+if (librechatUpstream) {
+  // Proxy UI to upstream for browser requests
+  const uiProxy = createProxyMiddleware({
+    target: librechatUpstream,
+    changeOrigin: true,
+    ws: true,
+    cookieDomainRewrite: '',
+    cookiePathRewrite: { '/': '/' },
+    logLevel: 'warn',
+  });
+  // Proxy common asset paths and SPA to upstream
+  app.use(['/assets', '/favicon.ico', '/manifest.json', '/sw.js', '/service-worker.js', '/robots.txt'], uiProxy);
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+    const p = req.path;
+    if (p.startsWith('/voygen') || p.startsWith('/api') || p.startsWith('/oauth') || p.startsWith('/health')) return next();
+    return (uiProxy as any)(req, res, next);
+  });
+}
 // 404 handler (API-only)
 app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint not found', path: req.path, method: req.method });
