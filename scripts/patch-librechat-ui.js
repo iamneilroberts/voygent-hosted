@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /**
- * Patches the cloned LibreChat workspace with Voygent UI tweaks:
+ * ESM script: Patches the cloned LibreChat workspace with Voygent UI tweaks:
  * - Adds StatusBar pill (local usage estimate + server fallback)
  * - Auto-start prompt for new chats by resolving Prompt Group
- *
+ * - Adds footer branding link
  * The script is idempotent and safe to run multiple times.
  */
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 const root = process.cwd();
 const lcDir = path.join(root, 'librechat');
