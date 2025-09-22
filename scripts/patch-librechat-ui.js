@@ -169,3 +169,25 @@ patchFile(chatFormPath, [
 
 console.log('[voygent patch] Completed UI patches');
 
+// 4) Footer branding link
+const footerPath = path.join(clientDir, 'components', 'Chat', 'Footer.tsx');
+if (exists(footerPath)) {
+  let changed = false;
+  let code = fs.readFileSync(footerPath, 'utf8');
+  if (!code.includes('Powered by Voygent.ai')) {
+    code = code.replace(
+      /const\s+termsOfServiceRender[\s\S]*?\);\n\n/, // after ToS render block
+      (m) =>
+        m +
+        `  // Voygent branding link\n  const voygentBranding = (\n    <a\n      className=\"text-text-secondary underline\"\n      href=\"https://voygent.ai/signup?utm_source=librechat\"\n      target=\"_blank\"\n      rel=\"noreferrer\"\n      title=\"Try Voygent.ai for free\"\n    >\n      Powered by Voygent.ai — Try for free\n    </a>\n  );\n\n`
+    );
+    code = code.replace(
+      /const\s+footerElements\s*=\s*\[[\s\S]*?\]\.filter\(/,
+      (m) =>
+        m.replace('[...mainContentRender,', '[...mainContentRender, voygentBranding,')
+    );
+    fs.writeFileSync(footerPath, code, 'utf8');
+    changed = true;
+  }
+  if (changed) console.log('[voygent patch] Added footer branding link');
+}
