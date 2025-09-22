@@ -12,7 +12,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: CONFIG_PATH
-        value: /opt/render/project/src/librechat.yaml
+        value: /opt/render/project/src/librechat/librechat.yaml
       - key: ENDPOINTS
         value: custom
       - key: MONGODB_URI
