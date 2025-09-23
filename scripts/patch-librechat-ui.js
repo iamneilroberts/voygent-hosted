@@ -191,3 +191,35 @@ if (exists(footerPath)) {
   }
   if (changed) console.log('[voygent patch] Added footer branding link');
 }
+
+// 5) Rollup config compatibility: prefer @rollup/plugin-typescript over rollup-plugin-typescript2
+const rollupTargets = [
+  path.join(lcDir, 'packages', 'data-provider', 'rollup.config.ts'),
+  path.join(lcDir, 'packages', 'data-schemas', 'rollup.config.ts'),
+];
+
+for (const fp of rollupTargets) {
+  if (!exists(fp)) continue;
+  const changed = patchFile(fp, [
+    {
+      test: /@rollup\/plugin-typescript|rollup-plugin-typescript2/,
+      replace: (code) => {
+        let s = code;
+        // Replace ESM import
+        s = s.replace(
+          /import\s+typescript\s+from\s+['"]rollup-plugin-typescript2['"];?/g,
+          "import typescript from '@rollup/plugin-typescript';",
+        );
+        // Replace CJS require
+        s = s.replace(
+          /const\s+typescript\s*=\s*require\(['"]rollup-plugin-typescript2['"]\);?/g,
+          "const typescript = require('@rollup/plugin-typescript');",
+        );
+        return s;
+      },
+    },
+  ]);
+  if (changed) {
+    console.log('[voygent patch] Updated rollup config to use @rollup/plugin-typescript:', fp);
+  }
+}
