@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "ts-node-esm src/index.ts",
     "build": "npm run install-librechat && npm run patch-librechat-ui && npm run build-all",
-    "start": "npm run start-librechat",
+    "start": "node dist/server.js",
     "test": "echo \"Tests not implemented yet\" && exit 0",
     "build-api-only": "npm install && tsc",
     "start-api-only": "node dist/server.js",
