@@ -204,12 +204,12 @@ for (const fp of rollupTargets) {
   let updated = original;
   // Replace ESM import
   updated = updated.replace(
-    /import\s+typescript\s+from\s+['"]rollup-plugin-typescript2['"];?/g,
+    /import\s+[^\s]+\s+from\s+['"]rollup-plugin-typescript2['"];?/g,
     "import typescript from '@rollup/plugin-typescript';",
   );
   // Replace CJS require
   updated = updated.replace(
-    /const\s+typescript\s*=\s*require\(['"]rollup-plugin-typescript2['"]\);?/g,
+    /const\s+[^\s]+\s*=\s*require\(['"]rollup-plugin-typescript2['"]\);?/g,
     "const typescript = require('@rollup/plugin-typescript');",
   );
   if (updated !== original) {
