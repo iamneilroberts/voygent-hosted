@@ -200,26 +200,22 @@ const rollupTargets = [
 
 for (const fp of rollupTargets) {
   if (!exists(fp)) continue;
-  const changed = patchFile(fp, [
-    {
-      test: /@rollup\/plugin-typescript|rollup-plugin-typescript2/,
-      replace: (code) => {
-        let s = code;
-        // Replace ESM import
-        s = s.replace(
-          /import\s+typescript\s+from\s+['"]rollup-plugin-typescript2['"];?/g,
-          "import typescript from '@rollup/plugin-typescript';",
-        );
-        // Replace CJS require
-        s = s.replace(
-          /const\s+typescript\s*=\s*require\(['"]rollup-plugin-typescript2['"]\);?/g,
-          "const typescript = require('@rollup/plugin-typescript');",
-        );
-        return s;
-      },
-    },
-  ]);
-  if (changed) {
+  const original = fs.readFileSync(fp, 'utf8');
+  let updated = original;
+  // Replace ESM import
+  updated = updated.replace(
+    /import\s+typescript\s+from\s+['"]rollup-plugin-typescript2['"];?/g,
+    "import typescript from '@rollup/plugin-typescript';",
+  );
+  // Replace CJS require
+  updated = updated.replace(
+    /const\s+typescript\s*=\s*require\(['"]rollup-plugin-typescript2['"]\);?/g,
+    "const typescript = require('@rollup/plugin-typescript');",
+  );
+  if (updated !== original) {
+    fs.writeFileSync(fp, updated, 'utf8');
     console.log('[voygent patch] Updated rollup config to use @rollup/plugin-typescript:', fp);
+  } else {
+    console.log('[voygent patch] No rollup change needed:', fp);
   }
 }
